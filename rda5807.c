@@ -21,13 +21,13 @@ enum rda5807_reg {
 	RDA5807_REG_CTRL         	= 0x02, 
 	RDA5807_REG_CHAN         	= 0x03, 
 	RDA5807_REG_IOCFG         	= 0x04, 
-	RDA5807_REG_INTM_THRESH_VOL = 0x05, 
-	RDA5807_REG_SEEK_RESULT     = 0x0A, 
+	RDA5807_REG_INTM_THRESH_VOL	= 0x05, 
+	RDA5807_REG_SEEK_RESULT		= 0x0A, 
 	RDA5807_REG_SIGNAL        	= 0x0B, 
-    RDA5807_REG_RDSA			= 0x0C,
-    RDA5807_REG_RDSB			= 0x0D,
-    RDA5807_REG_RDSC			= 0x0E,
-    RDA5807_REG_RDSD			= 0x0F
+	RDA5807_REG_RDSA			= 0x0C,
+	RDA5807_REG_RDSB			= 0x0D,
+	RDA5807_REG_RDSC			= 0x0E,
+	RDA5807_REG_RDSD			= 0x0F
 }; 
 
 #define FREQ_MIN_MHZ  76.0
@@ -480,7 +480,7 @@ int init(void)
 	else if ((data >> 8) == CHIP_ID)
 		read_swap = 0;
 	else {
-		fprintf(stderr, "stderrm RDA5807 not found\n");
+		fprintf(stderr, "RDA5807 not found\n");
 		exit(2);
 	}
 
@@ -497,27 +497,9 @@ int init(void)
 		data = 0x888f;	//05H, LNAP, Volume max,
 		wdata[6] = data >> 8;
 		wdata[7] = data & 0xff;
-		/*
-		   data = 0x00;	//06H,
-		   wdata[8] = data >> 8;
-		   wdata[9] = data & 0xff;
-		   data = 0x4202;	//07H, Seek threshold for old seek mode: Softblend enable: 0b10000
-		   wdata[10] = data >> 8;
-		   wdata[11] = data & 0xff;
-		*/
+
 		write(fd8, wdata, 8);
 	}
-/*
-	else { // set band and space to default
-		data = i2c_read(RDA5807_REG_CTRL);
-		wdata[0] = data >> 8;
-		wdata[1] = data & 0xff;
-		data = (i2c_read(RDA5807_REG_CHAN) & 0xfff0) | BAND_SPACE;
-		wdata[2] = data >> 8;
-		wdata[3] = data & 0xff;
-		write(fd8, wdata, 4);
-	}
-*/
 
 	return 0;
 }
