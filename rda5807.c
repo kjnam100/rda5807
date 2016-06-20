@@ -22,6 +22,7 @@ enum rda5807_reg {
 	RDA5807_REG_CHAN			= 0x03, 
 	RDA5807_REG_IOCFG			= 0x04, 
 	RDA5807_REG_INTM_THRESH_VOL	= 0x05, 
+	RDA5807_REG_BLEND			= 0x07,
 	RDA5807_REG_SEEK_RESULT		= 0x0A, 
 	RDA5807_REG_SIGNAL			= 0x0B, 
 	RDA5807_REG_RDSA			= 0x0C,
@@ -458,6 +459,7 @@ void usage()
 	fprintf(stderr, "\t%s bass [on|off]\n", prog_name);
 	fprintf(stderr, "\t%s deemphasis [75|50]\n", prog_name);
 	fprintf(stderr, "\t%s volume [up|down]|[0~15]\n", prog_name);
+	fprintf(stderr, "\t%s noise_blend [0~31]\n", prog_name);
 	exit(1);
 }
 
@@ -619,7 +621,7 @@ int main(int argc, char *argv[])
 		printf("De-emphasis: %s\n", get_deemphasis() ? "50us" : "75us");
 	}
 	else if (!strncmp(argv[1], "volume", len)) {
-		u_int8_t vol = 7;
+		u_int8_t vol = get_volume();
 		if (argc > 2) {
 			len = strlen(argv[2]);
 			if (!strncmp(argv[2], "up", len)) vol++;
@@ -630,6 +632,15 @@ int main(int argc, char *argv[])
 			else usage();
 		}
 		printf("Volume: %d\n", get_volume());
+	}
+	else if (!strncmp(argv[1], "noise_blend", len)) {
+		u_int16_t val;
+		if (argc > 2) {
+			val = atoi(argv[2]);
+			if (val >= 0 && val <= 31)
+				i2c_write(7, (i2c_read(RDA5807_REG_BLEND) & ~0x7c00) | (val << 10) | 0x02);
+		}
+		printf("Threshold for noise soft blend = %d\n", (i2c_read(RDA5807_REG_BLEND) & 0x7c00) >> 10);
 	}
 	else {
 		int preset;
