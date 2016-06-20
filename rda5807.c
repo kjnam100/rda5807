@@ -17,13 +17,13 @@
 #include <libgen.h>
 
 enum rda5807_reg { 
-	RDA5807_REG_CHIPID       	= 0x00, 
-	RDA5807_REG_CTRL         	= 0x02, 
-	RDA5807_REG_CHAN         	= 0x03, 
-	RDA5807_REG_IOCFG         	= 0x04, 
+	RDA5807_REG_CHIPID			= 0x00, 
+	RDA5807_REG_CTRL			= 0x02, 
+	RDA5807_REG_CHAN			= 0x03, 
+	RDA5807_REG_IOCFG			= 0x04, 
 	RDA5807_REG_INTM_THRESH_VOL	= 0x05, 
 	RDA5807_REG_SEEK_RESULT		= 0x0A, 
-	RDA5807_REG_SIGNAL        	= 0x0B, 
+	RDA5807_REG_SIGNAL			= 0x0B, 
 	RDA5807_REG_RDSA			= 0x0C,
 	RDA5807_REG_RDSB			= 0x0D,
 	RDA5807_REG_RDSC			= 0x0E,
@@ -154,6 +154,7 @@ int save_freq(double freq)
 	FILE *fd;
 	char s_freq[64];
 
+	printf("save freq=%3.1f\n", freq);
 	if (freq < FREQ_MIN_MHZ  || freq > FREQ_MAX_MHZ) return -1;
 
 	if ((fd = fopen(TUNED_FREQ, "w")) == NULL)
@@ -161,6 +162,7 @@ int save_freq(double freq)
 
 	sprintf(s_freq, "%3.1f", freq);
 	fputs(s_freq, fd);
+	fclose(fd);
 
 	return 0;
 }
@@ -309,7 +311,7 @@ int search(int dir)
 	return 0;
 }
 
-void freq_scan(int mode, int forced_mono)
+void freq_scan()
 {
 	double freq = FREQ_MIN_MHZ; 
 	u_int8_t mono, bass, mute, vol, level_adc;
@@ -361,7 +363,7 @@ int get_station_info()
 		strncpy(s_freq, &line[si], i - si);
 		s_freq[i] = 0;
 		freq = strtod(s_freq, NULL);
-		if (freq < 76.0 || freq > 108.0)
+		if (freq < FREQ_MIN_MHZ || freq > FREQ_MAX_MHZ)
 			continue;
 
 		station_info[station_info_num].freq = freq;
@@ -416,7 +418,7 @@ double get_tuned_freq(void)
 	freq = strtod(s_freq, NULL);
 	fclose(fd);
 
-	if (freq < 76.0 || freq > 108.0)
+	if (freq < FREQ_MIN_MHZ || freq > FREQ_MAX_MHZ)
 		return 0;
 
 	return freq;
@@ -508,7 +510,6 @@ int main(int argc, char *argv[])
 {
 	double freq;
 	size_t len;
-	int mode = 1;
 
 	prog_name = basename(argv[0]);
 
@@ -527,7 +528,7 @@ int main(int argc, char *argv[])
 
 	len = strlen(argv[1]);
 	if (!strncmp(argv[1], "scan", len)) {
-		freq_scan(mode, 1);
+		freq_scan();
 	}
 	else if (!strncmp(argv[1], "status", len)) {
 		print_status();
@@ -593,30 +594,27 @@ int main(int argc, char *argv[])
 	else if (!strncmp(argv[1], "bass", len)) {
 		if (argc > 2) {
 			len = strlen(argv[2]);
-			if (!strncmp(argv[2], "on", len)) mode = 1;
-			else if (!strncmp(argv[2], "off", len)) mode = 0;
+			if (!strncmp(argv[2], "on", len)) set_bass(1);
+			else if (!strncmp(argv[2], "off", len)) set_bass(0);
 			else usage();
-			set_bass(mode);
 		}
 		printf("Bass Boost: %s\n", get_bass() ? "Enabled" : "Disabled");
 	}
 	else if (!strncmp(argv[1], "afc", len)) {
 		if (argc > 2) {
 			len = strlen(argv[2]);
-			if (!strncmp(argv[2], "on", len)) mode = 1;
-			else if (!strncmp(argv[2], "off", len)) mode = 0;
+			if (!strncmp(argv[2], "on", len)) set_afc(1);
+			else if (!strncmp(argv[2], "off", len)) set_afc(0);
 			else usage();
-			set_afc(mode);
 		}
 		printf("afc: %s\n", get_afc() ? "off" : "on");
 	}
 	else if (!strncmp(argv[1], "deemphasis", len)) {
 		if (argc > 2) {
 			len = strlen(argv[2]);
-			if (!strncmp(argv[2], "75", len)) mode = 1;
-			else if (!strncmp(argv[2], "50", len)) mode = 0;
+			if (!strncmp(argv[2], "75", len)) set_deemphasis(1);
+			else if (!strncmp(argv[2], "50", len)) set_deemphasis(0);
 			else usage();
-			set_deemphasis(mode);
 		}
 		printf("De-emphasis: %s\n", get_deemphasis() ? "50us" : "75us");
 	}
