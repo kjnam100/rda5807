@@ -449,7 +449,7 @@ void usage()
 	fprintf(stderr, "Usage:\t%s [frequency|preset]\n", prog_name);
 	fprintf(stderr, "\t%s status\n", prog_name);
 	fprintf(stderr, "\t%s prev|next\n", prog_name);
-	fprintf(stderr, "\t%s scan]\n", prog_name);
+	fprintf(stderr, "\t%s scan\n", prog_name);
 	fprintf(stderr, "\t%s up|down\n", prog_name);
 	fprintf(stderr, "\t%s stepup|stepdown\n", prog_name);
 	fprintf(stderr, "\t%s stereo|mono\n", prog_name);
